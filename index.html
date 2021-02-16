@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
+    <title>dmm</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <div id="app">
+        <main v-if="!error">
+            <section v-if="!gameStarted" id="pregame">
+
+                <section v-if="player.role == 'maker'">
+                    <h2>
+                        Welcome to Dynamic Mastermind!
+                    </h2>
+                    <br>
+                    <h2 v-if="!game.id">
+                        Enter your player name and click <pre>enter</pre> to create a game.
+                    </h2>
+                    <div v-if="!game.id" class="panel">
+                        <input
+                            ref="makerName"
+                            type="text"
+                            v-model="player.name"
+                            placeholder="your player name"
+                            v-on:keyup.enter="createGame"
+                        >
+                    </div>
+                    <div class="alert panel" v-if="game.id">
+                        <strong>Game successfully created!</strong>
+                        <button @click="copyGameURL">Copy game URL</button>
+                    </div>
+                </section>
+
+                <section v-if="player.role == 'breaker' && game.players && game.players.length">
+                    <h1>
+                        welcome to {{ game.players[0].name }}'s dynamic mastermind game!
+                    </h1>
+                    <div class="panel">
+                        <input
+                            ref="breakerName"
+                            type="text"
+                            v-model="player.name"
+                            placeholder="your player name"
+                            v-on:keyup.enter="joinGame"
+                        >
+                    </div>
+                </section>
+            
+            </section>
+    
+            <section v-else>
+
+                <div id="players" class="panel">
+                    <div style="text-align: left">
+                        {{ game.players[0].name }}
+                        <h6>code {{ game.players[0].role }}</h6>
+                    </div>
+                    <div style="text-align: center">
+                        <strong>ROUND {{ adjRounds }}</strong>
+                    </div>
+                    <div style="text-align: right">
+                        {{ game.players[1].name }}
+                        <h6>code {{ game.players[1].role }}</h6>
+                    </div>
+                </div>
+
+                <section v-if="player.role == 'maker'" id="maker">
+                    <div v-for="r in rounds" class="round">
+                        <div class="code" v-if="game.codes.length > 0">
+                            <div class="boxes">
+                                <span v-if="!codeErrors[r-1]">
+                                    **
+                                </span>
+                                <span v-else>
+                                    --
+                                </span>
+                                <div
+                                    class="color-box"
+                                    v-for="(color, index) in game.codes[r-1]"
+                                    :style="{ backgroundColor: color }"
+                                    :key="index"
+                                ></div>
+                            </div>
+                        </div>
+                        <div class="guess" v-if="game.guesses.length > 0">
+                            <div class="boxes">
+                                <div
+                                    class="color-box"
+                                    v-for="(color, index) in game.guesses[r-1].content"
+                                    :style="{ backgroundColor: color }"
+                                    :key="index"
+                                ></div>
+                            </div>
+                            <div class="pegs">
+                                <div
+                                    v-for="peg in game.guesses[r-1].redPegs"
+                                    class="peg red-peg"
+                                ></div>
+                                <div
+                                    v-for="peg in game.guesses[r-1].whitePegs"
+                                    class="peg white-peg"
+                                ></div>
+                                <div
+                                    v-for="peg in codeLength - (game.guesses[r-1].whitePegs + game.guesses[r-1].redPegs)"
+                                    class="peg null-peg"
+                                ></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="round">
+                        <div class="code" v-if="this.turn == 'breaker'">
+                            <div class="boxes">
+                                <div
+                                    class="color-box"
+                                    v-for="(color, index) in game.codes[rounds]"
+                                    :style="{ backgroundColor: color }"
+                                    :key="index"
+                                ></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="help" v-show="showHelp">
+                            help for breaker
+                        </div>
+                            
+                        <!-- <h5>
+                            code:
+                            <span
+                                v-for="(color, index) in game.code"
+                            >
+                                {{ color }} / 
+                            </span>
+                        </h5>
+                
+                        <h5>
+                            guess: <span v-for="(item, index) in game.guess">{{ item }} / </span>
+                        </h5>
+        
+                        <h5>
+                            {{ redPegs }} locked (matches)
+                        </h5> -->
+                        
+    
+                        <div id="code-container" v-if="player.role == 'maker'">
+    
+                            {{ codeErrors }}
+
+                            <button @click="submitCode" v-if="turn == 'maker'">
+                                Submit code 
+                            </button>
+                            <h6 v-else>{{ game.players[1].name }}'s turn to submit a guess</h6>
+                            <draggable
+                                v-model="game.code"
+                                v-bind="dragOptions"
+                                tag="div"
+                                class="drag-container"
+                                :style="{ background: game.bgColor }"
+                            >
+                                <div
+                                    class="color-box draggable"
+                                    v-for="(color, index) in game.code"
+                                    :style="{ backgroundColor: color }"
+                                    @click="cycleColor(index, color, 'code')"
+                                    :key="index"
+                                ></div>
+                            </draggable>
+                        </div>
+        
+                    </div>
+                </section>
+
+                <section v-if="player.role == 'breaker'" id="breaker">
+                    <div v-for="r in rounds" class="round">
+                        <div class="guess" v-if="game.guesses.length > 0">
+                            <div class="boxes">
+                                <div
+                                    class="color-box"
+                                    v-for="(color, index) in game.guesses[r-1].content"
+                                    :style="{ backgroundColor: color }"
+                                    :key="index"
+                                ></div>
+                            </div>
+                            <div class="pegs">
+                                <div
+                                    v-for="peg in game.guesses[r-1].redPegs"
+                                    class="peg red-peg"
+                                ></div>
+                                <div
+                                    v-for="peg in game.guesses[r-1].whitePegs"
+                                    class="peg white-peg"
+                                ></div>
+                                <div
+                                    v-for="peg in codeLength - (game.guesses[r-1].whitePegs + game.guesses[r-1].redPegs)"
+                                    class="peg null-peg"
+                                ></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="help" v-show="showHelp">
+                            help for breaker
+                        </div>
+                        <!-- <h5>
+                            code:
+                            <span
+                                v-for="(color, index) in game.code"
+                            >
+                                {{ color }} / 
+                            </span>
+                        </h5> -->
+                        <button @click="submitGuess" v-if="turn == 'breaker'">
+                            Submit guess
+                        </button>
+                        <h6 v-else>{{ game.players[0].name }}'s turn to change the code</h6>
+                        <div id="guess-container">
+                            <draggable
+                                v-model="game.guess"
+                                v-bind="dragOptions"
+                                tag="div"
+                                class="drag-container"
+                                :style="{ background: game.bgColor }"
+                            >
+                                <div
+                                    class="color-box draggable"
+                                    v-for="(color, index) in game.guess"
+                                    :style="{ backgroundColor: color }"
+                                    @click="cycleColor(index, color, 'guess')"
+                                    :key="index"
+                                ></div>
+                            </draggable>
+                        </div>
+                    </div>
+                </section>
+    
+            </section>
+        </main>
+
+        <main v-else>
+            something went wrong...
+        </main>
+
+        
+
+        
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+
+    <script src="https://hammerjs.github.io/dist/hammer.min.js"></script>
+
+    <!-- CDNJS :: Sortable (https://cdnjs.com/) -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.8.4/Sortable.min.js"></script>
+    <!-- CDNJS :: Vue.Draggable (https://cdnjs.com/) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Vue.Draggable/2.20.0/vuedraggable.umd.min.js"></script>
+    <script src="js/main.js"></script>
+    
+</body>
+
+</html>

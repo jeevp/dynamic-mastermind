@@ -1,0 +1,304 @@
+
+:root {
+    --font-sans: 'overpass', sans-serif;
+    --font-mono: 'overpass mono', sans-serif;
+    --text-color: black;
+    --animate-delay: 0.5s;
+    /* --bg-color: #1a1f2c; */
+    --bg-color: white;
+    --accent-color: #1da01d;
+    --gray: #ebebeb;
+    --dark-gray: #a0a0a0;
+    --gutter: 16px;
+}
+
+*, *:before, *:after {
+    box-sizing: border-box;
+    font-size: 1em;
+}
+
+body {
+    font-family: var(--font-sans);
+    font-size: 16px;
+    margin: 0;
+    padding: 0;
+    color: var(--text-color);
+    background: var(--bg-color);
+}
+
+#pregame, #players {
+    max-width: calc(100% - (2 *var(--gutter)));
+    margin-right: auto;
+    margin-left: auto;
+}
+
+h1 {
+    font-size: 1.4em;
+}
+
+pre {
+    font-family: var(--font-mono);
+    display: inline;
+    background: var(--gray);
+    padding: 2px 4px;
+    border-radius: 0.25em;
+    margin: 0 2px;
+    max-width: fit-content;
+}
+
+main {
+    padding-top: 2vw;
+    max-width: 600px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.pegs {
+    display: flex;
+    align-items: center;
+    width: fit-content;
+    justify-content: flex-end;
+    margin-left: var(--gutter);
+}
+
+.peg {
+    border-radius: 50%;
+    width: 10px;
+    height: 10px;
+    margin-right: 5px;
+    border-radius: 50%;    
+}
+
+.peg:last-child {
+    margin-right: 0;
+}
+
+.red-peg {
+    background: red;
+}
+.white-peg {
+    background: black;
+}
+.null-peg {
+    background: transparent;
+    box-shadow: inset 0 0 0 2px var(--gray);
+}
+
+.panel {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    
+}
+
+.panel input {
+    flex: 1;
+}
+
+button {
+    border: none;
+    cursor: pointer;
+    padding: 4px 8px;
+    font-family: inherit;
+    color: white;
+    font-size: 1em;
+    background: #000;
+    border-radius: 0.4em;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+input, button {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    font-weight: 500;
+    border-radius: 0.4em;
+}
+
+input[type="text"] {
+    margin: 0;
+    background: none;
+    border: none;
+    width: 100%;
+    line-height: 1;
+    border-radius: 0em;
+    font-size: 1.2em;
+    padding: 0.5em 0;
+    transition: 0.2s all ease;
+    box-shadow: inset 0 -3px 0 0 var(--gray);
+    color: var(--text-color);
+}
+
+input[type="text"]:focus {
+    background: var(--gray);
+    border-radius: 0.2em;
+    outline: none;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+}
+
+button:focus {
+    outline: none;
+    transform: translateY(3px);
+}
+
+button:active {
+    transform: translateY(3px);
+}
+
+#players div {
+    width: 40%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#players {
+    margin-bottom: var(--gutter);
+}
+
+h6 {
+    margin: 0;
+    color: var(--dark-gray);
+    font-weight: 700;
+    font-size: 0.75em;
+    text-transform: uppercase;
+}
+
+.alert {
+    background: var(--gray);
+    padding: 10px;
+    border-radius: 0.4em;
+}
+
+/* .chosen {
+    opacity: 0.4;
+} */
+
+/* .ghost {
+    opacity: 0
+} */
+
+
+.color-box { 
+    margin: 0;
+    flex: 1;
+    height: 100%;
+    opacity: 1;
+}
+
+.color-box:last-child {
+    border-radius: 0 0.1em 0.1em 0;
+}
+
+.color-box:first-child {
+    border-radius: 0.1em 0px 0 0.1em;
+}
+
+#guess-container {
+    width: 100%;
+    height: 50vh;
+    border-radius: 0.1em;
+}
+
+#code-container {
+    width: 100%;
+    height: 10vh;
+}
+
+.drag-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 0.1em;
+}
+
+.round {
+    width: 100%;
+    position: relative;
+}
+
+.round .code, .round .guess {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.round .boxes {
+    flex: 1;
+    height: var(--gutter);
+    display: flex;
+}
+
+#breaker {
+    width: 100%;
+}
+
+#breaker .round {
+    display: flex;
+    margin-bottom: calc(var(--gutter) / 2);
+}
+
+#breaker .round .guess {
+    width: 100%;
+}
+
+#breaker .pegs {
+    margin-right: var(--gutter);
+}
+
+#breaker .round .guess .boxes {
+    max-width: calc(100% - 72px);
+}
+
+#maker .round {
+    width: 90%;
+    margin-right: auto;
+    margin-left: auto;
+    padding: calc(var(--gutter) / 2);
+}
+
+#maker .round .code .boxes, #maker .round .guess .boxes {
+    max-width: calc(100% - 72px);
+}
+
+#maker .round .guess {
+    margin-top: 6px;
+}
+
+#maker .round .code .boxes {
+    height: calc(var(--gutter) / 2);
+    opacity: 0.6;
+}
+
+#maker .round .code::before {
+    content: '';
+    height: 5px;
+    border: 1px solid var(--text-color);
+    width: 5%;
+    border-radius: 0 0 0 20px;
+    position: absolute;
+    left: -5%;
+    top: calc(var(--gutter) / 2);
+    border-top: none;
+    border-right: none;
+}
+
+#maker .round .guess::after {
+    content: '';
+    height: 5px;
+    border: 1px solid var(--text-color);
+    width: 5%;
+    border-radius: 20px 0;
+    position: absolute;
+    right: -5%;
+    border-top: none;
+    border-left: none;
+}
+
+.boxes span {
+    line-height: calc(var(--gutter));
+    font-family: var(--font-mono);
+}
